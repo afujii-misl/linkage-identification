@@ -1,18 +1,9 @@
 import numpy as np
-import sys
 import copy
-from process import *
-from sklearn.linear_model.tests.test_ridge import ind
-sys.path.append("../deap_misl")
 import random as rnd
-import tools as misl_tools
-import matplotlib.pyplot as plt
-from matplotlib import cm
 from deap import base, creator, tools
 import seaborn as sns
 from tqdm import tqdm
-from mpl_toolkits.mplot3d import Axes3D
-from scipy import genfromtxt
 
 def gen_epistasis(N, K):
     
@@ -45,7 +36,7 @@ def gen_epistasis(N, K):
 def culc_fitness(genotype, rnt, epistasis, key):
    
    
-    genotype =to_matrix(genotype) 
+    genotype =to_matrix(genotype)#for matrix
     genotype_np= np.array(genotype)
     
     N = len(genotype)
@@ -53,13 +44,12 @@ def culc_fitness(genotype, rnt, epistasis, key):
     
     for i in np.arange(N**2):
         fitness[i] = rnt[int(np.sum(genotype_np[epistasis[i, 0], epistasis[i, 1]] * key)), i]
-    
-    genotype = individual_flatten(genotype)
+    genotype = individual_flatten(genotype)#for matix
     
     return np.mean(fitness),
 
-    
-def individual_flatten(ind):
+  
+def individual_flatten(ind):#for dealing with matrix  
     
     ind_1=np.ravel(ind)
 
@@ -68,7 +58,7 @@ def individual_flatten(ind):
     
     return ind
 
-def to_matrix(genotype):
+def to_matrix(genotype):#for dealing with matrix 
     
     ind3=np.array(genotype)
     ind3=ind3.reshape(N,N)
@@ -89,7 +79,7 @@ def LINK(pop):
     lincage_list=[[] for i in range(N*N)]
     
     for ind in tqdm(pop):
-        ind2 = individual_flatten(ind)
+        ind2 = individual_flatten(ind)#for matrix
         for i in range(N*N):
             p1=perturb(ind2,i)#perturb    
             df1 = toolbox.evaluate(p1)[0]-toolbox.evaluate(ind2)[0]
@@ -120,13 +110,8 @@ if __name__=='__main__':
     rnd.seed(seed)
     np.random.seed(seed)
     rnt = np.random.randint(1, 101, (2**(K+1), N**2))
-    
-    
-    
     epistasis = gen_epistasis(N, K)
-    print epistasis
-    
-    
+
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
     toolbox = base.Toolbox()
@@ -136,21 +121,9 @@ if __name__=='__main__':
     # Structure initializers
     toolbox.register("individual", tools.initRepeat, creator.Individual,toolbox.attr_row, N)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-    toolbox.register("mate", misl_tools.cxUniform1d_2)
-    toolbox.register("mutate1d", tools.mutFlipBit, indpb=1.0/(N*N))
-    toolbox.register("mutate", misl_tools.mutate2d, toolbox=toolbox)
-    toolbox.register("select", tools.selTournament,tournsize=3)
     toolbox.register("evaluate",culc_fitness, rnt=rnt, epistasis=epistasis, key=key)
     
     pop = toolbox.population(n=POP_SIZE)
     link_unique=[list(set(i)) for i in LINK(pop)]
-    print link_unique
+    print link_unique #to omit duplication
     
-    
-    
-    
-    
-    
-    
-    
-       
